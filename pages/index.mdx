@@ -82,6 +82,169 @@ const db = admin.firestore();
 
 module.exports = db;
 ```
+Navigate to the project settings on our Firebase project and generate a new key for our project. 
+
+Now, let's proceed to work on the app.js file to set up our backend to listen to requests:
+
+```javascript
+const express = require('express');
+const app = express();
+
+const db = require('./firebase');
+
+app.use(express.json());
+
+const Port = process.env.PORT || 3000;
+app.listen(Port, () => {
+    console.log(`server is running on port ${Port}`);
+
+});
+```
+
+Now, let's proceed to write the functions to handle requests, starting with adding a user
+
+```javascript
+
+app.post('/addUser', async (req, res) => {
+
+    try {
+        
+        const { username } = req.body;
+
+        if (!username) {
+            
+            return res.status(400).json({ error: "username is required" });
+        }
+
+        const userRef = await db.collection('users').add({ username });
+
+        res.status(201).json({ message: "user added successfully", userId: userRef.id });
+
+
+
+    } catch (error) {
+        
+        console.error("Error adding user: ", error)
+        res.status(500).json({ error: 'internal server error '})
+    }
+    
+});
+
+
+```
+
+To test these endpoints, we will use a VSCode extension called REST Client. 
+Create a new file called test.rest to test out all the functions we have written.
+
+```
+### Add User Endpoint ###
+
+# POST request to add a user
+POST http://localhost:3000/addUser
+Content-Type: application/json
+
+{
+  "username": "JohnDoe"
+}
+
+### Add Todo Endpoint ###
+
+# POST request to add a todo for a user
+POST http://localhost:3000/addTodo/VnXTO5y2nC8oVURIYA4u# Replace 'user123' with a valid user ID
+Content-Type: application/json
+
+{
+  "todo": "watch football" 
+}
+
+### Delete Todo Endpoint ###
+
+# DELETE request to delete a todo for a user
+DELETE http://localhost:3000/deleteTodo/VnXTO5y2nC8oVURIYA4u/rV1NGQXnPZCg3LbAEfJi# Replace 'user123' and 'todo456' with valid user ID and todo ID
+
+
+### Get Todos Endpoint ###
+
+# GET request to retrieve all todos for a user
+GET http://localhost:3000/getTodos/VnXTO5y2nC8oVURIYA4u# Replace 'user123' with a valid user ID
+
+
+```
+
+For adding a todo item (a POST request), let's write a function to handle the request.
+
+```javascript
+app.post('/addTodo/:userId', async (req, res) => {
+
+    console.log("ereee")
+    try { 
+
+        console.log("inside tryyy ")
+        const { userId } = req.params
+        const { todo } = req.body
+        
+        if (!todo) {
+            return res.status(400).json({ error: "todo is required" });
+
+        }
+        const todoRef = db.collection('users').doc(userId).collection('todos')
+
+        const todoDocRef = await todoRef.add({
+            todo
+        });
+
+        res.status(201).json({ message: "user added successfully", todoId: todoDocRef.id });
+
+
+    }
+    catch (error) {
+        
+        console.error("Error adding user: ", error)
+        res.status(500).json({ error: 'internal server error '})
+    } 
+    }
+
+
+);
+```
+
+Function for deleting an item : 
+```javascript
+app.delete('/deleteTodo/:userId/:todoId', async (req, res) => {
+    try {
+      const { userId, todoId } = req.params;
+      await db.collection('users').doc(userId).collection('todos').doc(todoId).delete();
+      res.status(200).json({ message: 'Todo deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  
+```
+
+Now, lets handle requests to get all the todo items of a user
+```javascript
+app.get('/getTodos/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+      const todosSnapshot = await db.collection('users').doc(userId).collection('todos').get();
+        const todos = [];
+        
+      todosSnapshot.forEach(doc => {
+        todos.push({ id: doc.id, ...doc.data() });
+      });
+      res.status(200).json({ todos });
+    } catch (error) {
+      console.error('Error getting todos:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+```
+
 
 
 
