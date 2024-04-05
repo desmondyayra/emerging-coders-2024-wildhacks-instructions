@@ -9,3 +9,77 @@ A **simple**, **powerful** and **flexible** site generation framework with every
 ## Documentation
 
 The documentation is available at [https://nextra.site](https://nextra.site).
+
+
+---
+title: Building a Node.js Todo App with Firebase Integration
+---
+
+# Building a Node.js Todo App with Firebase Integration
+
+## Setting Up Node.js and Firebase
+
+To get started, let's install Node.js and set up a Firebase database for our Todo App.
+
+### Installing Node.js
+
+1. Install Node.js by downloading the installer from the [Node.js website](https://nodejs.org/en/download) and following the installation instructions for your operating system.
+
+2. Verify that Node.js is installed correctly by running the following command in your terminal:
+
+```sh
+node --version
+
+
+### Setting Up a Node.js Project
+
+1. Create a new directory for your Node.js project in your preferred location.
+
+2. Navigate to the newly created directory in your terminal.
+
+3. Run the following command to initialize a new Node.js project:
+
+```sh
+npm init
+
+
+
+
+
+## Creating a Firebase Database
+
+Now, let's create a Firebase project and set up a Firestore database.
+
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project.
+
+2. Follow the instructions to set up your Firebase project and enable Firestore as the database.
+
+### Installing Firebase Admin SDK
+
+1. Install the Firebase Admin SDK in your Node.js project by running the following command in your terminal:
+
+
+```sh
+npm install firebase-admin
+
+
+### Connecting Your App to Firebase
+
+Create a `firebase.js` file in your project directory with the following content:
+
+```javascript
+const admin = require('firebase-admin');
+const serviceAccount = require('./credentials.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
+
+module.exports = db;
+
+
+
+
+
